@@ -19,4 +19,4 @@ PPGdata = c.getPPGData("6_1_4")
 results = c.getValidHRranges(PPGdata)
 
 for i in results:
-	print(i[0]) # print heart rate value
+    print(i[0]) # print heart rate value
