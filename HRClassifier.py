@@ -1,7 +1,7 @@
 ######################################################################################
-#                                                                                       #
+#                                                                                    #
 #  Heart rate segment classifier (using raw and noisy/motion affected PPG readings)  #
-#                                                                                     #
+#                                                                                    #
 ######################################################################################
 #
 # Feature selection explanation (summary of section discussed in the thesis):
