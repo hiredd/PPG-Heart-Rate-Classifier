@@ -9,13 +9,13 @@
 # PPG feature extraction determined using heart rate signal qualities found empirically:
 #
 # 1.  Calculate the PPG's power spectral density and extract the mean magnitude of the components in the 
-#       high frequency (20 to 200Hz) range. Heart rate signal segments demonstrate lower HF component 
+#     high frequency (20 to 200Hz) range. Heart rate signal segments demonstrate lower HF component 
 #     amplitudes than noisy/random signals.
 #
 # 2.  LF/HF component magnitude ratio (greater in heart rate signal segments than in noisy signals).
 #
 # 3.  Prominent peak location variance in signal (heart rate signal tends to be fairly 
-#       regular and exhibits lower variance in peak position)
+#     regular and exhibits lower variance in peak position)
 #
 
 import csv
