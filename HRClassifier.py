@@ -19,6 +19,7 @@
 #
 
 import csv
+import sys
 from pathlib import Path
 import numpy as np
 import scipy as sp
@@ -27,11 +28,12 @@ from scipy import signal
 from sklearn import svm
 from sklearn.externals import joblib
 from sklearn.model_selection import train_test_split
+sys.path.append('libs')
 import detect_peaks
 
 class HRClassifier:
 
-    sampleWindow = 1600 # PPG readings for feature extraction
+    sampleWindow = 800#1600 # PPG readings for feature extraction
 
     def train(self, trainAnyway = False):
         if not trainAnyway:
@@ -67,9 +69,9 @@ class HRClassifier:
 
         features = []
 
-        for i in range(int(PPGsize/self.sampleWindow)):
+        for i in range(PPGsize//self.sampleWindow):
             start = self.sampleWindow*i
-            end = self.sampleWindow*(i+1)
+            end = self.sampleWindow*(i+1)-1
 
             if PPGdata[start, 1] == 0 or PPGdata[end, 1] == 0:
                 continue
@@ -79,8 +81,8 @@ class HRClassifier:
             # Filter outliers using a moving median filter
             dataWindow = signal.medfilt(dataWindow, 3)
             
-            # Power spectral density (400 reading window, 400/2 sequential window overlap)
-            f, pxx = signal.welch(dataWindow, fs = 90, nperseg = 400)
+            # Power spectral density (self.sampleWindow/4 reading window, self.sampleWindow/(4*2) sequential window overlap)
+            f, pxx = signal.welch(dataWindow, fs = 90, nperseg = self.sampleWindow/4)
             pxx = [10*np.log10(x) for x in pxx] 
 
             # Mean amplitude of HF components (20 to 200Hz range)
@@ -95,6 +97,9 @@ class HRClassifier:
             dataWindow = signal.filtfilt(b, a, dataWindow)
             # Find the segment peaks' indices for peak occurrence variance feature.
             indices = detect_peaks.detect_peaks(dataWindow, mph = 30, mpd = 20)
+            peakVariance = np.finfo(np.float64).max
+            if len(indices) > 1:
+                peakVariance = np.var(np.diff(indices))
 
             # Calculate the heart rate number from number of peaks and start:end timeframe 
             startTime = self.getReadingTime(PPGdata, start)
@@ -106,9 +111,9 @@ class HRClassifier:
             # Filter out HR values outside of normal human range (50-120Hz), if this is a known valid HR segment
             if isValidHR == False or (isValidHR == True and heartRate < 120 and heartRate > 50):
                 if returnHR == False:
-                    features.append([m, lfhfratio, np.var(np.diff(indices))])
+                    features.append([m, lfhfratio, peakVariance])
                 else:
-                    features.append([m, lfhfratio, np.var(np.diff(indices)), heartRate])
+                    features.append([m, lfhfratio, peakVariance, heartRate])
         return features
 
 
@@ -117,7 +122,7 @@ class HRClassifier:
         featureSetP = []
         for date in allRanges:
             # Load training set PPG record file
-            PPGdata = self.getPPGData(date)
+            PPGdata = self.getPPGDataFromFile(date)
             PPGdata[0,:] = self.correctSaturation(PPGdata[0,:])
 
             for r in allRanges[date]:
@@ -134,7 +139,7 @@ class HRClassifier:
             print("Trained classifier not found, need to train first.")
             raise
 
-        features = self.extractFeatures(PPGdata, returnHR = True)
+        features = self.extractFeatures(PPGdata, isValidHR = True, returnHR = True)
 
         validHRranges = []
 
@@ -172,9 +177,16 @@ class HRClassifier:
 
     # Params: string in format month_day_deviceID
     # Return: 2xN array of PPG readings and their timestamps
-    def getPPGData(self, dateDeviceID):
+    def getPPGDataFromFile(self, dateDeviceID):
         return np.array(list(csv.reader(open("dataPPG/data_%s_PPG.csv" % dateDeviceID, "rt"), delimiter=','))).astype('float')
 
+    def getPPGDataFromStream(self, source):
+        data = []
+        i = 0
+        while i<self.sampleWindow:
+            data.append(source.readline().strip().decode("utf-8").split(','))
+            i+=1
+        return np.array(data).astype('float')
 
     def getReadingTime(self, PPGdata, readingID):
         return datetime(int(PPGdata[readingID, 1]), int(PPGdata[readingID, 2]), int(PPGdata[readingID, 3]), 
