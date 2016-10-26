@@ -9,4 +9,4 @@ Go from this:
 
 to this:
 
-<div style="text-align:center" align="center"><img src="figures/after.png" width="350"><br />BPM:75</div>
+<div style="text-align:center" align="center"><img src="figures/after.png" width="350"><br />BPM:97.5</div>
