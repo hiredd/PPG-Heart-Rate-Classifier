@@ -3,10 +3,10 @@ Extract quality heart rate segments from noisy/motion affected raw PPG measureme
 
 See _thesis_excerpt.pdf_ and _HRClassifier.py_ for details
 
-Go from this:
+Go from this (long term measurement):
 
 <div style="text-align:center" align="center"><img src="figures/before.png" width="350"></div>
 
-to this:
+to this (positively classified segment, zoomed in):
 
 <div style="text-align:center" align="center"><img src="figures/after.png" width="350"><br />BPM:97.5</div>
