@@ -9,4 +9,4 @@ Go from this:
 
 to this:
 
-<div style="text-align:center" align="center"><img src="figures/after.png" width="350"><br />Positively classified segment, zoomed in<br />97.5 beats per minute</div>
+<div style="text-align:center" align="center"><img src="figures/after.png" width="350"><br />Positively classified segment, zoomed in;<br />97.5 beats per minute</div>
