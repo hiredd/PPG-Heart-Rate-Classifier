@@ -5,8 +5,8 @@ See _thesis_excerpt.pdf_ and _HRClassifier.py_ for details
 
 Go from this:
 
-<div style="text-align:center" align="center"><img src="figures/before.png" width="450"><br />Long term PPG measurement</div>
+<div style="text-align:center" align="center"><img src="figures/before.png" width="500"><br />Long term PPG measurement</div>
 
 to this:
 
-<div style="text-align:center" align="center"><img src="figures/after.png" width="450"><br />Positively classified segment, zoomed in;<br />97.5 beats per minute</div>
+<div style="text-align:center" align="center"><img src="figures/after.png" width="500"><br />Positively classified segment, zoomed in;<br />97.5 beats per minute</div>
