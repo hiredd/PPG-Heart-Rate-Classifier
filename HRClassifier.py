@@ -28,12 +28,13 @@ from scipy import signal
 from sklearn import svm
 from sklearn.externals import joblib
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 sys.path.append('libs')
 import detect_peaks
 
 class HRClassifier:
 
-    sampleWindow = 800#1600 # PPG readings for feature extraction
+    sampleWindow = 500#1600 # PPG readings for feature extraction
 
     def train(self, trainAnyway = False):
         if not trainAnyway:
@@ -151,7 +152,7 @@ class HRClassifier:
             if(score > 0.5 and label == [1]):
                 start = self.sampleWindow*i
                 end = self.sampleWindow*(i+1)
-                validHRranges.append([f[3], start, end])
+                validHRranges.append([f[3], start, end, score])
 
         return validHRranges
 
