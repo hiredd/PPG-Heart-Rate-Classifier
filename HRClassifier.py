@@ -26,6 +26,7 @@ import scipy as sp
 from datetime import datetime
 from scipy import signal
 from sklearn import svm
+from sklearn import linear_model
 from sklearn.externals import joblib
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
@@ -47,18 +48,24 @@ class HRClassifier:
         HRfeatures = self.extractAllFeatures(self.HRranges, isValidHR = True)
         NonHRfeatures = self.extractAllFeatures(self.NonHRranges, isValidHR = False)
         allFeatures = HRfeatures + NonHRfeatures
+
         # Label valids as 1 and invalids as 0
-        allLabels = [1]*len(HRfeatures) + [0]*len(NonHRfeatures)
+        allLabels = [1 for _ in range(len(HRfeatures))] + [0 for _ in range(len(NonHRfeatures))] 
+        
         # Train, leave out 20% of features
         allFeaturesTrain, allFeaturesTest, allLabelsTrain, allLabelsTest = train_test_split(allFeatures, allLabels, test_size=0.2)
-        # Use a linear support vector machine algorithm
-        model = svm.SVC(kernel='linear')
+        
+        # Use a linear model classifier
+        model = svm.SVC(kernel='linear', probability=True)
+        #model = linear_model.SGDClassifier()
         model.fit(allFeaturesTrain, allLabelsTrain) 
+
         # Save the trained classifier for future use
         joblib.dump(model, 'trainedHRclassifier.pkl') 
+
         # Accuracy (0-1 value)
         print(model.score(allFeaturesTest, allLabelsTest))
-
+        predictedLabels = model.predict(allFeaturesTest)
 
     # Params: 1) Nx2 array of PPG readings and corresponding timestamps
     #          2) For training, whether the array readings represent a valid heart rate segment
@@ -122,6 +129,7 @@ class HRClassifier:
     def extractAllFeatures(self, allRanges, isValidHR = False, returnHR = False):
         featureSetP = []
         for date in allRanges:
+            print(date)
             # Load training set PPG record file
             PPGdata = self.getPPGDataFromFile(date)
             PPGdata[0,:] = self.correctSaturation(PPGdata[0,:])
@@ -140,19 +148,19 @@ class HRClassifier:
             print("Trained classifier not found, need to train first.")
             raise
 
-        features = self.extractFeatures(PPGdata, isValidHR = True, returnHR = True)
+        features = np.array(self.extractFeatures(PPGdata, isValidHR = True, returnHR = True))
 
         validHRranges = []
 
-        for i,f in enumerate(features):
-            label = model.predict([f[0:3]])
-            score = model.score([f[0:3]], label)
+        labels = model.predict(features[:,0:3])
+        ds = np.absolute(np.array(model.decision_function(features[:,0:3])))
 
-            # Consider over 70% confidence to be good enough
-            if(score > 0.5 and label == [1]):
-                start = self.sampleWindow*i
-                end = self.sampleWindow*(i+1)
-                validHRranges.append([f[3], start, end, score])
+        for i,f in enumerate(features):
+            label = labels[i]
+            confidence = ds[i]
+
+            if confidence < 0.3 and label == 1:
+                validHRranges.append([int(f[3]), confidence])
 
         return validHRranges
 
@@ -198,7 +206,7 @@ class HRClassifier:
     # Manually observed ranges in (start,end) format of valid and invalid PPG readings for 
     # different devices and days during a single week, used for feature extraction in self.train 
     HRranges = {
-    '6_2_1': [[61911,64962],[65446,67882],[80208,85046],[88139,90207],[223169,223899],[232908,234236],[265489,267293],[353947,354697],[366813,371476],[411791,415532],[448336,449363]],
+    #'6_2_1': [[61911,64962],[65446,67882],[80208,85046],[88139,90207],[223169,223899],[232908,234236],[265489,267293],[353947,354697],[366813,371476],[411791,415532],[448336,449363]],
     '6_2_2': [[203981,208131],[215986,217841],[221827,222478],[437989,439886],[458251,459258],[493759,494177]],
     '6_2_3': [[221380,222809]],
     '6_1_1': [[391997,395445],[396675,400513],[411186,415921],[425726,426439],[430232,432188],[439971,441243],[491068,492569]],
