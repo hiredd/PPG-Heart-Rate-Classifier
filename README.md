@@ -1,4 +1,4 @@
-# PPG-heart-rate-classifier
+# PPG Heart Rate Classifier
 Extract quality heart rate segments from noisy/motion affected raw PPG measurements. Once trained, the model can be integrated into a mobile application to automatically detect heart rate patterns in live PPG stream (e.g. via BLE) and calculate the person's BPM number.
 
 See _thesis_excerpt.pdf_ and _HRClassifier.py_ for details
