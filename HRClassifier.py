@@ -57,7 +57,6 @@ class HRClassifier:
         
         # Use a linear model classifier
         model = svm.SVC(kernel='linear', probability=True)
-        #model = linear_model.SGDClassifier()
         model.fit(allFeaturesTrain, allLabelsTrain) 
 
         # Save the trained classifier for future use

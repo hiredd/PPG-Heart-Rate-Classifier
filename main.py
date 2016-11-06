@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 
 c = HRClassifier()
 
-c.train()
+c.train(False)
 
 if 1==1:
 	# Load test set
